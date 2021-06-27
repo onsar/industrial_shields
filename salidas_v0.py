@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
-import configparser
+import subprocess
+import time
+import os
+import paho.mqtt.publish as publish
 
-import paho.mqtt.client as mqtt
+import configparser
 
 from urllib.request import urlopen
 
@@ -36,17 +39,6 @@ mqtt_password = parser.get('listener','mqtt_password')
 
 
 
-def tx_emoncms(url_long_):
-    result = 'ok'
-
-    try:
-        response = urlopen(url_long_, timeout=5)
-    except:
-        result="time_out"
-        logging.info("timeout: tx_emoncms(url_long_)")
-        
-    # print response.getcode()
-
 def on_connect(client, obj, flags, rc):
     logging.debug("rc: " + str(rc))
     client.subscribe(mqtt_topic)
@@ -54,12 +46,14 @@ def on_connect(client, obj, flags, rc):
 def on_message(client, userdata, msg):
     cadena = msg.topic
     data_string = msg.payload
+    
+    name_1 = "C3.3"
+    value_1 = "0"
     decoded_ok = 1
     
     logging.info("emoncms payload:")
     logging.info(data_string)
-    
-    #Decoded
+
     decoded = json.loads(data_string)
     
     try:
@@ -70,18 +64,23 @@ def on_message(client, userdata, msg):
         logging.info("error in decoded")
         decoded_ok = 0
     
-    if decoded_ok == 1:
-        url_long= 'http://{0}/emoncms/input/post?node={1}&fulljson={{"{2}":{3}}}&apikey={4}'
-        url_long=url_long.format(tx_cms_ip, listener_name, name_1, value_1, tx_key)
+    if (name_1[0] == A) and (decoded_ok == 1)
+
+        script_A = "sudo /home/pi/test/analog/set-analog-output {0} {1}"
+        script_A =script_A.format(name_1,value_1)        
+        os.system(script_A)
+        logging.info(script_A)
+        
+    elif (name_1[0] == Q) and (decoded_ok == 1)
+
+        script_Q = "sudo /home/pi/test/analog/set-digital-output {0} {1}"
+        script_Q =script_A.format(name_1,value_1)        
+        os.system(script_Q)
+        logging.info(script_Q)
         
     else:
-        url_long= 'http://{0}/emoncms/input/post?node={1}&fulljson={{"{2}":{3}}}&apikey={4}'
-        url_long=url_long.format(tx_cms_ip, listener_name, "error", "1", tx_key)
-
+        logging.info("Error in parameters")
     
-    logging.info(url_long)
-    tx_emoncms(url_long)
-
     
 def on_disconnect(client, userdata, rc):
     if rc != 0:
@@ -97,8 +96,4 @@ client.on_diconnect = on_disconnect
 client.username_pw_set(mqtt_login,mqtt_password)
 client.connect(mqtt_ip, 1883, 60)
 client.loop_forever(timeout=1.0, max_packets=1, retry_first_connection=False)
-
-
-
-
 
