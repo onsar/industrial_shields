@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 
-import subprocess
+
 import time
 import os
-import paho.mqtt.publish as publish
+import paho.mqtt.client as mqtt
 
 import configparser
 
-from urllib.request import urlopen
-
 import logging
 from logging.handlers import RotatingFileHandler
+
 
 import json
 
@@ -20,17 +19,15 @@ import json
 # Para comprobar el funcionamiento: level=logging.INFO
 logging.basicConfig(
         level=logging.INFO,
-        handlers=[RotatingFileHandler('./logs/log_modbus.log', maxBytes=1000000, backupCount=10)],
+        handlers=[RotatingFileHandler('./logs/log_outputs.log', maxBytes=1000000, backupCount=10)],
         format='%(asctime)s %(levelname)s %(message)s',
         datefmt='%m/%d/%Y %I:%M:%S %p')
 
 # Parseo de variables del .ini
 parser = configparser.ConfigParser()
-parser.read('config.ini')
+parser.read('config_outputs.ini')
 
 # Parseo de las variables de emonCMS
-tx_cms_ip = parser.get('emoncms','cms_ip')
-tx_key = parser.get('emoncms','key')
 mqtt_topic = parser.get('listener','topic')
 listener_name = parser.get('listener','name')
 mqtt_ip = parser.get('listener','mqtt_ip')
@@ -44,7 +41,6 @@ def on_connect(client, obj, flags, rc):
     client.subscribe(mqtt_topic)
 
 def on_message(client, userdata, msg):
-    cadena = msg.topic
     data_string = msg.payload
     
     name_1 = "C3.3"
@@ -64,14 +60,14 @@ def on_message(client, userdata, msg):
         logging.info("error in decoded")
         decoded_ok = 0
     
-    if (name_1[0] == A) and (decoded_ok == 1)
+    if (name_1[0] == 'A') and (decoded_ok == 1):
 
         script_A = "sudo /home/pi/test/analog/set-analog-output {0} {1}"
         script_A =script_A.format(name_1,value_1)        
         os.system(script_A)
         logging.info(script_A)
         
-    elif (name_1[0] == Q) and (decoded_ok == 1)
+    elif (name_1[0] == 'Q') and (decoded_ok == 1):
 
         script_Q = "sudo /home/pi/test/analog/set-digital-output {0} {1}"
         script_Q =script_A.format(name_1,value_1)        

@@ -1,2 +1,3 @@
 config.ini
 logs/*.log
+config_outputs.ini
