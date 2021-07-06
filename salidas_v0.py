@@ -70,7 +70,7 @@ def on_message(client, userdata, msg):
     elif (name_1[0] == 'Q') and (decoded_ok == 1):
 
         script_Q = "sudo /home/pi/test/analog/set-digital-output {0} {1}"
-        script_Q =script_A.format(name_1,value_1)        
+        script_Q =script_Q.format(name_1,value_1)        
         os.system(script_Q)
         logging.info(script_Q)
         
